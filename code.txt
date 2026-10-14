@@ -1,0 +1,153 @@
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Datos precargados
+pesos_iniciales = [
+    350, 420, 480, 500, 550, 600, 420, 580, 390, 450,
+    520, 610, 470, 490, 530, 420, 700, 380, 560, 950
+]
+
+df = pd.DataFrame({"peso": pesos_iniciales})
+min_ideal, max_ideal = 400, 600
+
+
+def mostrar_estadisticas():
+    pesos = df["peso"]
+
+    print("\n--- ESTADÍSTICAS DESCRIPTIVAS ---")
+    print(f"Media: {pesos.mean():.2f} g")
+    print(f"Mediana: {pesos.median():.2f} g")
+    print(f"Moda: {pesos.mode().tolist()} g")
+    print(f"Desviación estándar: {pesos.std():.2f} g")
+    print(f"Coeficiente de variación: {pesos.std() / pesos.mean() * 100:.2f}%")
+    print(f"Asimetría: {pesos.skew():.2f}")
+
+    print("\n--- PESOS EXTREMOS ---")
+    print(f"Más pesado: {pesos.max()} g")
+    print(f"Más ligero: {pesos.min()} g")
+
+    ideales = pesos.between(min_ideal, max_ideal)
+    print(f"\n--- RANGO IDEAL ({min_ideal:g} - {max_ideal:g} g) ---")
+    print(f"Aguacates dentro del rango: {ideales.sum()}")
+    print(f"Porcentaje: {ideales.mean() * 100:.2f}%")
+
+
+def mostrar_graficos():
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4))
+
+    axes[0].hist(df["peso"], bins=8, edgecolor="black")
+    axes[0].set_title("Distribución de pesos")
+    axes[0].set_xlabel("Peso (g)")
+    axes[0].set_ylabel("Cantidad de aguacates")
+
+    axes[1].boxplot(df["peso"])
+    axes[1].set_title("Valores atípicos")
+    axes[1].set_ylabel("Peso (g)")
+
+    plt.tight_layout()
+    plt.show()
+
+
+def ingresar_datos():
+    global df
+
+    try:
+        entrada = input("Introduce los pesos separados por comas: ")
+        pesos = [float(p.strip()) for p in entrada.split(",")]
+
+        if len(pesos) < 3 or any(p <= 0 for p in pesos):
+            print("Introduce al menos 3 pesos positivos.")
+            return
+
+        df = pd.DataFrame({"peso": pesos})
+        print("Datos actualizados correctamente.")
+
+    except ValueError:
+        print("Error: introduce únicamente números separados por comas.")
+
+
+def definir_rango():
+    global min_ideal, max_ideal
+
+    try:
+        minimo = float(input("Peso mínimo ideal (g): "))
+        maximo = float(input("Peso máximo ideal (g): "))
+
+        if minimo <= 0 or maximo < minimo:
+            print("Rango inválido.")
+            return
+
+        min_ideal, max_ideal = minimo, maximo
+        print("Rango actualizado correctamente.")
+
+    except ValueError:
+        print("Debes introducir valores numéricos.")
+
+
+def exportar_analisis():
+    pesos = df["peso"]
+    ideales = pesos.between(min_ideal, max_ideal)
+
+    with open("analisis_aguacates.txt", "w", encoding="utf-8") as archivo:
+        archivo.write("CONCURSO DE AGUACATES GIGANTES\n\n")
+        archivo.write(f"Cantidad: {len(pesos)}\n")
+        archivo.write(f"Media: {pesos.mean():.2f} g\n")
+        archivo.write(f"Mediana: {pesos.median():.2f} g\n")
+        archivo.write(f"Moda: {pesos.mode().tolist()} g\n")
+        archivo.write(f"Desviación estándar: {pesos.std():.2f} g\n")
+        archivo.write(f"Coeficiente de variación: {pesos.std() / pesos.mean() * 100:.2f}%\n")
+        archivo.write(f"Asimetría: {pesos.skew():.2f}\n")
+        archivo.write(f"Más pesado: {pesos.max()} g\n")
+        archivo.write(f"Más ligero: {pesos.min()} g\n")
+        archivo.write(f"Rango ideal: {min_ideal:g} - {max_ideal:g} g\n")
+        archivo.write(f"Cantidad en rango: {ideales.sum()}\n")
+        archivo.write(f"Porcentaje en rango: {ideales.mean() * 100:.2f}%\n")
+
+    print("Análisis guardado en analisis_aguacates.txt")
+
+def exportar_csv():
+    df.to_csv("aguacates.csv", index=False, encoding="utf-8-sig")
+    print("Datos exportados correctamente a aguacates.csv")
+
+# Menú principal
+while True:
+    print("\n===== CONCURSO DE AGUACATES GIGANTES =====")
+    print("1. Usar datos precargados")
+    print("2. Introducir pesos manualmente")
+    print("3. Definir rango ideal")
+    print("4. Mostrar estadísticas y análisis")
+    print("5. Mostrar gráficos")
+    print("6. Exportar análisis a TXT")
+    print("7. Exportar análisis a CSV")
+    print("0. Salir")
+
+    opcion = input("Selecciona una opción: ")
+
+    if opcion == "1":
+        df = pd.DataFrame({"peso": pesos_iniciales})
+        print("Datos precargados seleccionados.")
+
+    elif opcion == "2":
+        ingresar_datos()
+
+    elif opcion == "3":
+        definir_rango()
+
+    elif opcion == "4":
+        mostrar_estadisticas()
+
+    elif opcion == "5":
+        mostrar_graficos()
+
+    elif opcion == "6":
+        exportar_analisis()
+
+    elif opcion == "0":
+        print("¡Hasta pronto!")
+        break
+    elif opcion == "7":
+      exportar_csv()        
+
+    else:
+        print("Opción no válida. Inténtalo de nuevo.")
